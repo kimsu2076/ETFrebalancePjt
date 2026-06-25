@@ -1,0 +1,19 @@
+# 환경 변수 및 인증 캐시
+.env
+data/.kis_token_cache.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+
+# 로그
+logs/
+*.log

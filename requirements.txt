@@ -1,0 +1,35 @@
+# ETF Rebalance ETL Project - requirements.txt
+# Python 3.10 이상 권장
+
+# 데이터 처리
+pandas>=2.0.0
+numpy>=1.24.0
+
+# HTTP 요청 및 웹 스크래핑
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+lxml>=5.0.0          # BS4 파싱 속도 향상
+
+# MySQL 연동
+pymysql>=1.1.0
+SQLAlchemy>=2.0.0
+
+# 환경 변수 관리
+python-dotenv>=1.0.0
+
+# 날짜/시간 유틸
+python-dateutil>=2.8.0
+
+# 스케줄링 (간단한 인프로세스 스케줄링용, cron과 병행 가능)
+schedule>=1.2.0
+
+# 로깅 및 유틸 (선택)
+loguru>=0.7.0        # 더 예쁜 로깅 원하시면 (기본 logging도 충분)
+
+# PDF 파싱 (TIGER holdings가 PDF일 경우 필요)
+# pdfplumber>=0.10.0
+
+# 개발/테스트용 (선택)
+# pytest>=7.4.0
+# black>=23.0.0
+# isort>=5.12.0
