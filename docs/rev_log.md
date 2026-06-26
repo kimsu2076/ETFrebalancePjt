@@ -1,5 +1,46 @@
 # ETF Rebalance ETL 수정 로그
 
+## 2026-06-26 — 3단계: KIS NAV ETL v1 (2년치 백필 + 일일 증분)
+
+### 추가 파일
+| 파일 | 설명 |
+|------|------|
+| `src/db/navRepository.py` | Watermark 조회, NAV 변환, etf_nav_daily UPSERT |
+| `src/etl/__init__.py` | ETL 패키지 초기화 |
+| `src/etl/navEtl.py` | NAV ETL 오케스트레이션 (Extract→Transform→Load) |
+| `scripts/etl_nav.py` | CLI 진입점 (`--mode incremental\|backfill`) |
+| `scripts/testCronNav.py` | cron 증분 2회 연속 멱등성 테스트 |
+| `config/cron_nav_etl.example` | crontab 일일 증분 스케줄 예시 |
+
+### 수정 파일
+| 파일 | 설명 |
+|------|------|
+| `src/kis/kisNavClient.py` | `fetchNavComparisonDailyTrend()`, `fetchNavDailyRange()` 추가 |
+| `src/kis/__init__.py` | 신규 NAV 일별 API export |
+| `.env.example` | `NAV_BACKFILL_START_DATE` 추가 |
+
+### 주요 기능
+- KIS API: `/uapi/etfetn/v1/quotations/nav-comparison-daily-trend` (tr_id: FHPST02440200)
+- 100건/호출 제한 → 종료일 역순 분할 호출로 2년치 백필 (6배치)
+- Watermark: `SELECT MAX(trade_date)` 기반 증분 (`last_date + 1` ~ 오늘)
+- `ON DUPLICATE KEY UPDATE` 멱등 UPSERT
+- 로그: `logs/etl_nav.log`
+
+### 실행 방법
+```bash
+source /home/smt14/pywork/.venv/bin/activate
+cd /home/smt14/ETFrebalancePjt
+python scripts/etl_nav.py --mode backfill      # 최초 2년치 백필
+python scripts/etl_nav.py --mode incremental   # 일일 증분 (cron용)
+python scripts/testCronNav.py                  # cron 멱등성 테스트
+```
+
+### 적재 결과 (2026-06-26 실행)
+- TIGER 200 (102110): **502건** (2024-06-03 ~ 2026-06-26)
+- 증분/cron 시뮬레이션: 최신 상태 확인, 멱등성 통과
+
+---
+
 ## 2026-06-26 — 2단계: MySQL 스키마 생성 및 etf_master 초기 적재
 
 ### 추가 파일
