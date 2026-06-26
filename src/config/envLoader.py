@@ -67,3 +67,45 @@ def validateKisConfig(config):
         }
 
     return {"success": True, "message": "KIS 설정 검증 완료"}
+
+
+def getDbConfig():
+    """MySQL 연동에 필요한 설정 딕셔너리를 반환한다."""
+    loadProjectEnv()
+
+    portText = getEnvValue("DB_PORT", "3306")
+    try:
+        portValue = int(portText)
+    except ValueError:
+        portValue = 3306
+
+    config = {
+        "host": getEnvValue("DB_HOST", "127.0.0.1"),
+        "port": portValue,
+        "user": getEnvValue("DB_USER", ""),
+        "password": getEnvValue("DB_PASS", ""),
+        "database": getEnvValue("DB_NAME", "etf_rebalance"),
+        "targetEtfCode": getEnvValue("TARGET_ETF_CODE", "102110"),
+        "targetEtfName": getEnvValue("TARGET_ETF_NAME", "TIGER 200"),
+    }
+    return config
+
+
+def validateDbConfig(config):
+    """MySQL 설정 필수값 검증 결과를 반환한다."""
+    missingKeys = []
+    requiredFields = ["host", "user", "password", "database"]
+    for i in range(0, len(requiredFields)):
+        fieldName = requiredFields[i]
+        fieldValue = config.get(fieldName, "")
+        if fieldValue == "" or fieldValue == "your_password":
+            missingKeys.append(fieldName)
+
+    if len(missingKeys) > 0:
+        return {
+            "success": False,
+            "message": "MySQL 연결 정보가 설정되지 않았습니다. .env 파일의 DB_HOST, DB_USER, DB_PASS, DB_NAME을 확인해주세요.",
+            "missingKeys": missingKeys,
+        }
+
+    return {"success": True, "message": "MySQL 설정 검증 완료"}
