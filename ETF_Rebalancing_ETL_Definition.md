@@ -210,6 +210,9 @@ if not new_data.empty:
 - **검증**: 8/8 PASS
 
 ### 모니터링
+- **메인 (Streamlit)**: `http://localhost:3000` — `.streamlit/config.toml`
+- **테스트 (Express)**: `http://localhost:3003` — [`Dashboard_Definition.md`](Dashboard_Definition.md)
+
 ```bash
 streamlit run scripts/monitorDashboard.py
 ```

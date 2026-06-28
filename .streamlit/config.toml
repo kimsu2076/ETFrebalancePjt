@@ -1,0 +1,7 @@
+# Streamlit 모니터링 대시보드 (메인) — 포트 3000
+[server]
+port = 3000
+address = "localhost"
+
+[browser]
+gatherUsageStats = false

@@ -108,14 +108,17 @@ cron 예시: `config/cron_pipeline_etl.example`
 
 ## 모니터링 대시보드
 
+| 구분 | 스택 | 포트 | 용도 |
+|------|------|------|------|
+| **메인** | Streamlit | **3000** | 일상 모니터링 (현재 구현) |
+| 테스트 | Node.js/Express | **3003** | 실험·대안 UI ([`Dashboard_Definition.md`](Dashboard_Definition.md)) |
+
 ```bash
 streamlit run scripts/monitorDashboard.py
-# http://localhost:8501
+# http://localhost:3000  (.streamlit/config.toml)
 ```
 
 - 요약 카드, NAV 추이, 리밸런싱 이벤트, Top 5 비중 추이, Holdings 조회, 검증 상태
-
-Node.js 대시보드 설계: [`Dashboard_Definition.md`](Dashboard_Definition.md)
 
 ---
 

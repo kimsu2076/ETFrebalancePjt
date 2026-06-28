@@ -1,9 +1,10 @@
 # ETF Rebalance Dashboard 요구사항 정의서
 
-**문서 버전**: 1.0  
+**문서 버전**: 1.1  
 **작성일**: 2026년 6월 25일  
 **기술 스택**: Node.js (Express) + Chart.js  
-**목적**: ETL로 적재된 리밸런싱 및 지분 변동 데이터를 시각적으로 쉽게 확인할 수 있는 가벼운 개인용 대시보드
+**목적**: ETL로 적재된 리밸런싱 및 지분 변동 데이터를 시각적으로 쉽게 확인할 수 있는 가벼운 개인용 대시보드  
+**포트 정책**: Express는 **테스트/대안 UI** (`http://localhost:3003`). **메인 모니터링**은 Streamlit (`http://localhost:3000`, `scripts/monitorDashboard.py`)
 
 ---
 
@@ -219,13 +220,13 @@ dashboard/
 ```bash
 cd dashboard
 npm install
-cp .env.example .env   # DB 접속 정보 입력
-npm start
+cp .env.example .env   # DB 접속 정보 입력, PORT=3003 권장
+PORT=3003 npm start
 # 또는
-node app.js
+PORT=3003 node app.js
 ```
 
-브라우저에서 `http://localhost:3000` 접속
+브라우저에서 `http://localhost:3003` 접속 (Express 테스트용; 메인 Streamlit은 3000)
 
 ---
 

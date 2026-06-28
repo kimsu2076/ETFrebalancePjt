@@ -1,5 +1,21 @@
 # ETF Rebalance ETL 수정 로그
 
+## 2026-06-28 — 모니터링 포트 정책 정리
+
+### 추가·수정 파일
+| 파일 | 설명 |
+|------|------|
+| `.streamlit/config.toml` | Streamlit 메인 포트 **3000** 고정 |
+| `README.md` | Streamlit 3000 / Express 3003 표 정리 |
+| `Dashboard_Definition.md` | Express 테스트 포트 **3003**, 메인은 Streamlit 3000 명시 |
+| `ETF_Rebalancing_ETL_Definition.md` | §8 모니터링 포트 안내 갱신 |
+
+### 포트 정책
+- **3000**: Streamlit (`monitorDashboard.py`) — 메인
+- **3003**: Node.js/Express — 테스트·대안 UI
+
+---
+
 ## 2026-06-28 — 7단계: 문서화 + 간단 모니터링 (Streamlit) (재시행)
 
 ### 추가 파일
