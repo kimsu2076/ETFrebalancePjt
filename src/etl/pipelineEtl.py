@@ -1,45 +1,18 @@
 # -*- coding: utf-8 -*-
 """NAV + Holdings 통합 ETL 파이프라인 모듈"""
 
-import logging
-import os
 from datetime import datetime
 
 from src.config.envLoader import getDbConfig, getKisConfig, validateDbConfig
+from src.etl.etlLogger import logEtlError, setupEtlLogger
 from src.db.dbConnection import testDbConnection
 from src.etl.holdingsEtl import runHoldingsEtl
 from src.etl.navEtl import runNavEtl
 
 
-def getLogFilePath():
-    """통합 파이프라인 로그 파일 경로를 반환한다."""
-    from src.config.envLoader import getProjectRoot
-
-    projectRoot = getProjectRoot()
-    logDir = os.path.join(projectRoot, "logs")
-    if os.path.exists(logDir) is False:
-        os.makedirs(logDir, exist_ok=True)
-    return os.path.join(logDir, "etl_pipeline.log")
-
-
 def setupPipelineLogger():
     """통합 파이프라인 로거를 설정한다."""
-    logger = logging.getLogger("pipelineEtl")
-    if len(logger.handlers) > 0:
-        return logger
-
-    logger.setLevel(logging.INFO)
-    logFormat = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s")
-
-    fileHandler = logging.FileHandler(getLogFilePath(), encoding="utf-8")
-    fileHandler.setFormatter(logFormat)
-    logger.addHandler(fileHandler)
-
-    streamHandler = logging.StreamHandler()
-    streamHandler.setFormatter(logFormat)
-    logger.addHandler(streamHandler)
-
-    return logger
+    return setupEtlLogger("pipelineEtl", "etl_pipeline.log")
 
 
 def runFullPipeline(navMode="incremental", holdingsMode="incremental", holdingsDate="", holdingsDates=None):
@@ -116,7 +89,11 @@ def runFullPipeline(navMode="incremental", holdingsMode="incremental", holdingsD
     except Exception as generalError:
         errorMessage = "통합 파이프라인 실행 실패: " + str(generalError)
         logger = setupPipelineLogger()
-        logger.error(errorMessage)
+        logEtlError(
+            logger,
+            errorMessage,
+            {"navMode": navMode, "holdingsMode": holdingsMode},
+        )
         return {
             "success": False,
             "message": errorMessage,

@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 """KIS NAV ETL 핵심 오케스트레이션 모듈"""
 
-import logging
-import os
 from datetime import datetime
 
 from src.config.envLoader import getDbConfig, getKisConfig, validateDbConfig, validateKisConfig
+from src.etl.etlLogger import logEtlError, setupEtlLogger
 from src.db.dbConnection import getDbEngine, testDbConnection
 from src.db.navRepository import (
     getNavDailyStats,
@@ -17,35 +16,9 @@ from src.kis.kisAuth import refreshKisToken
 from src.kis.kisNavClient import fetchNavDailyRange
 
 
-def getLogFilePath():
-    """NAV ETL 로그 파일 경로를 반환한다."""
-    from src.config.envLoader import getProjectRoot
-
-    projectRoot = getProjectRoot()
-    logDir = os.path.join(projectRoot, "logs")
-    if os.path.exists(logDir) is False:
-        os.makedirs(logDir, exist_ok=True)
-    return os.path.join(logDir, "etl_nav.log")
-
-
 def setupNavEtlLogger():
     """NAV ETL 전용 로거를 설정한다."""
-    logger = logging.getLogger("navEtl")
-    if len(logger.handlers) > 0:
-        return logger
-
-    logger.setLevel(logging.INFO)
-    logFormat = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s")
-
-    fileHandler = logging.FileHandler(getLogFilePath(), encoding="utf-8")
-    fileHandler.setFormatter(logFormat)
-    logger.addHandler(fileHandler)
-
-    streamHandler = logging.StreamHandler()
-    streamHandler.setFormatter(logFormat)
-    logger.addHandler(streamHandler)
-
-    return logger
+    return setupEtlLogger("navEtl", "etl_nav.log")
 
 
 def runNavEtl(runMode="incremental"):
@@ -150,7 +123,7 @@ def runNavEtl(runMode="incremental"):
     except Exception as generalError:
         errorMessage = "NAV ETL 실행 실패: " + str(generalError)
         logger = setupNavEtlLogger()
-        logger.error(errorMessage)
+        logEtlError(logger, errorMessage, {"runMode": runMode})
         return {
             "success": False,
             "message": errorMessage,

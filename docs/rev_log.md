@@ -1,5 +1,50 @@
 # ETF Rebalance ETL 수정 로그
 
+## 2026-06-28 — 6단계: 데이터 품질 검증, 2년치 초기 적재, 로그/에러 핸들링 (재시행)
+
+### 추가 파일
+| 파일 | 설명 |
+|------|------|
+| `src/etl/etlLogger.py` | RotatingFileHandler 기반 공통 ETL 로거 |
+| `src/etl/holdingsBackfillDates.py` | KOSPI200 분기 리밸런싱 기준일 하드코딩 목록 |
+| `src/etl/dataQualityValidator.py` | 8개 항목 데이터 품질 검증 + 리포트 생성 |
+| `src/etl/initialLoadRunner.py` | NAV 백필 + 분기 holdings + 검증 오케스트레이션 |
+| `scripts/validateData.py` | 데이터 품질 검증 CLI |
+| `scripts/runInitialLoad.py` | 2년치 초기 적재 CLI |
+| `reports/validation_report_20260628.md` | 검증 리포트 (Markdown) |
+| `reports/validation_report_20260628.json` | 검증 리포트 (JSON) |
+
+### 수정 파일
+| 파일 | 설명 |
+|------|------|
+| `src/etl/navEtl.py` | 공통 RotatingFileHandler 로거 적용 |
+| `src/etl/holdingsEtl.py` | 공통 RotatingFileHandler 로거 적용 |
+| `src/etl/pipelineEtl.py` | 공통 RotatingFileHandler 로거 적용 |
+| `src/db/rebalancingRepository.py` | `rebuildRebalancingEvents()` 이벤트 재생성 |
+| `.env.example` | `HOLDINGS_BACKFILL_DATES` 주석 예시 추가 |
+
+### 주요 기능
+- 검증 항목: etf_master, NAV 커버리지/품질/공백, holdings 비중합계, 참조무결성, NAV↔holdings 정합성, 이벤트 일치
+- 로그: `RotatingFileHandler` (5MB × 5백업), 구조화 에러 `logEtlError()`
+- 초기 적재: NAV 502건 백필(멱등) + 분기 holdings 9스냅샷(1,800행) + 이벤트 8건 재생성
+- 검증 종합: **8/8 PASS**
+
+### 실행 방법
+```bash
+source /home/smt14/pywork/.venv/bin/activate
+cd /home/smt14/ETFrebalancePjt
+python scripts/runInitialLoad.py
+python scripts/validateData.py
+```
+
+### 적재·검증 결과 (2026-06-28 재시행)
+- NAV: 502건 (2024-06-03 ~ 2026-06-26)
+- holdings: 9 스냅샷, 1,800행 (2024-06-25 ~ 2026-06-25)
+- rebalancing_event: 8건 (연속 스냅샷 쌍 재생성)
+- 검증 리포트: `reports/validation_report_20260628.md`
+
+---
+
 ## 2026-06-26 — 5단계: Holdings snapshot + rebalancing_event ETL 통합
 
 ### 추가 파일

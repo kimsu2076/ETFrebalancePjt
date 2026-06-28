@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 """Holdings snapshot + rebalancing_event ETL 오케스트레이션 모듈"""
 
-import logging
-import os
 import time
 from datetime import datetime
 
 from src.config.envLoader import getDbConfig, getKisConfig, validateDbConfig
+from src.etl.etlLogger import logEtlError, setupEtlLogger
 from src.db.dbConnection import getDbEngine, testDbConnection
 from src.db.holdingsRepository import (
     getHoldingsStats,
@@ -28,35 +27,9 @@ from src.etl.rebalancingDetector import (
 from src.scraper.tigerHoldingsScraper import scrapeTigerHoldings
 
 
-def getLogFilePath():
-    """Holdings ETL 로그 파일 경로를 반환한다."""
-    from src.config.envLoader import getProjectRoot
-
-    projectRoot = getProjectRoot()
-    logDir = os.path.join(projectRoot, "logs")
-    if os.path.exists(logDir) is False:
-        os.makedirs(logDir, exist_ok=True)
-    return os.path.join(logDir, "etl_holdings.log")
-
-
 def setupHoldingsEtlLogger():
     """Holdings ETL 전용 로거를 설정한다."""
-    logger = logging.getLogger("holdingsEtl")
-    if len(logger.handlers) > 0:
-        return logger
-
-    logger.setLevel(logging.INFO)
-    logFormat = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s")
-
-    fileHandler = logging.FileHandler(getLogFilePath(), encoding="utf-8")
-    fileHandler.setFormatter(logFormat)
-    logger.addHandler(fileHandler)
-
-    streamHandler = logging.StreamHandler()
-    streamHandler.setFormatter(logFormat)
-    logger.addHandler(streamHandler)
-
-    return logger
+    return setupEtlLogger("holdingsEtl", "etl_holdings.log")
 
 
 def filterEquityRecords(recordList):
@@ -268,7 +241,7 @@ def runHoldingsEtl(runMode="incremental", snapshotDate="", dateList=None):
     except Exception as generalError:
         errorMessage = "Holdings ETL 실행 실패: " + str(generalError)
         logger = setupHoldingsEtlLogger()
-        logger.error(errorMessage)
+        logEtlError(logger, errorMessage, {"runMode": runMode})
         return {
             "success": False,
             "message": errorMessage,

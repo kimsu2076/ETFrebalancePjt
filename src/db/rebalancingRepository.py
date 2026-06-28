@@ -75,6 +75,136 @@ def getRebalancingEventStats(engine, etfCode):
         }
 
 
+def deleteRebalancingEvents(engine, etfCode):
+    """특정 ETF의 rebalancing_event 레코드를 전체 삭제한다."""
+    deleteSql = """
+        DELETE FROM rebalancing_event
+        WHERE etf_code = :etf_code
+    """
+    try:
+        with engine.begin() as connection:
+            result = connection.execute(text(deleteSql), {"etf_code": etfCode})
+            deletedCount = result.rowcount
+
+        return {
+            "success": True,
+            "message": "rebalancing_event 삭제 완료",
+            "deletedCount": deletedCount,
+        }
+    except Exception as deleteError:
+        return {
+            "success": False,
+            "message": "rebalancing_event 삭제 실패: " + str(deleteError),
+        }
+
+
+def getAllSnapshotDates(engine, etfCode):
+    """holdings 스냅샷 기준일 목록을 오름차순으로 조회한다."""
+    selectSql = """
+        SELECT DISTINCT snapshot_date
+        FROM etf_holdings_snapshot
+        WHERE etf_code = :etf_code
+        ORDER BY snapshot_date ASC
+    """
+    dateList = []
+    try:
+        with engine.connect() as connection:
+            result = connection.execute(text(selectSql), {"etf_code": etfCode})
+            rows = result.fetchall()
+            for i in range(0, len(rows)):
+                snapshotDate = rows[i][0]
+                if hasattr(snapshotDate, "strftime"):
+                    dateList.append(snapshotDate.strftime("%Y-%m-%d"))
+                else:
+                    dateList.append(str(snapshotDate)[:10])
+
+        return {
+            "success": True,
+            "message": "스냅샷 기준일 목록 조회 완료",
+            "dates": dateList,
+            "dateCount": len(dateList),
+        }
+    except Exception as queryError:
+        return {
+            "success": False,
+            "message": "스냅샷 기준일 조회 실패: " + str(queryError),
+        }
+
+
+def rebuildRebalancingEvents(engine, etfCode):
+    """모든 연속 스냅샷 쌍에 대해 리밸런싱 이벤트를 재생성한다."""
+    from src.db.holdingsRepository import getSnapshotRows
+    from src.etl.rebalancingDetector import (
+        buildRebalancingEventRecord,
+        detectRebalancingChanges,
+    )
+
+    datesResult = getAllSnapshotDates(engine, etfCode)
+    if datesResult.get("success") is not True:
+        return datesResult
+
+    dateList = datesResult.get("dates", [])
+    if len(dateList) < 2:
+        return {
+            "success": True,
+            "message": "비교할 스냅샷이 2개 미만 — 이벤트 재생성 생략",
+            "eventCount": 0,
+        }
+
+    deleteResult = deleteRebalancingEvents(engine, etfCode)
+    if deleteResult.get("success") is not True:
+        return deleteResult
+
+    insertedCount = 0
+    skippedCount = 0
+    eventSummary = []
+
+    for i in range(1, len(dateList)):
+        previousDate = dateList[i - 1]
+        currentDate = dateList[i]
+
+        prevRowsResult = getSnapshotRows(engine, etfCode, previousDate, equityOnly=True)
+        currentRowsResult = getSnapshotRows(engine, etfCode, currentDate, equityOnly=True)
+        if prevRowsResult.get("success") is not True or currentRowsResult.get("success") is not True:
+            continue
+
+        detectionResult = detectRebalancingChanges(
+            prevRowsResult.get("rows", []),
+            currentRowsResult.get("rows", []),
+        )
+
+        if detectionResult.get("hasChanges") is not True:
+            skippedCount = skippedCount + 1
+            continue
+
+        eventRecord = buildRebalancingEventRecord(
+            etfCode,
+            currentDate,
+            detectionResult,
+            sourceName="Detected",
+        )
+        insertResult = insertRebalancingEvent(engine, eventRecord)
+        if insertResult.get("success") is True and insertResult.get("inserted") is True:
+            insertedCount = insertedCount + 1
+            eventSummary.append({
+                "eventDate": currentDate,
+                "addedCount": detectionResult.get("addedCount", 0),
+                "removedCount": detectionResult.get("removedCount", 0),
+                "changedCount": detectionResult.get("changedCount", 0),
+                "turnoverPct": detectionResult.get("totalTurnoverPct", 0),
+            })
+
+    return {
+        "success": True,
+        "message": "리밸런싱 이벤트 재생성 완료",
+        "deletedCount": deleteResult.get("deletedCount", 0),
+        "insertedCount": insertedCount,
+        "skippedCount": skippedCount,
+        "snapshotPairCount": len(dateList) - 1,
+        "eventSummary": eventSummary,
+    }
+
+
 def getRecentRebalancingEvents(engine, etfCode, limitCount=5):
     """최근 리밸런싱 이벤트 목록을 조회한다."""
     selectSql = """
