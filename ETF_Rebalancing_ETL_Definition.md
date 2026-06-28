@@ -190,4 +190,31 @@ if not new_data.empty:
 - KOSPI 200 리밸런싱 일정: KRX 공시 참조
 
 ---
+
+## 8. 구현 완료 현황 (2026-06-28 기준)
+
+| 단계 | 상태 | 주요 산출물 |
+|------|------|-------------|
+| 1. KIS API 인증 | ✅ | `src/kis/kisAuth.py`, `scripts/testKisNav.py` |
+| 2. MySQL 스키마 | ✅ | `sql/schema.sql`, `scripts/initDatabase.py` |
+| 3. NAV ETL v1 | ✅ | `scripts/etl_nav.py` — 502건 |
+| 4. Holdings 스크래퍼 | ✅ | `src/scraper/tigerHoldingsScraper.py` |
+| 5. 통합 파이프라인 | ✅ | `scripts/etl_pipeline.py` |
+| 6. 품질 검증·초기 적재 | ✅ | `scripts/validateData.py`, 검증 리포트 |
+| 7. 문서화·모니터링 | ✅ | `README.md`, `scripts/monitorDashboard.py` |
+
+### 적재 현황
+- **etf_nav_daily**: 502건 (2024-06-03 ~ 2026-06-26)
+- **etf_holdings_snapshot**: 9 스냅샷 / 1,800행
+- **rebalancing_event**: 8건
+- **검증**: 8/8 PASS
+
+### 모니터링
+```bash
+streamlit run scripts/monitorDashboard.py
+```
+
+상세 실행 가이드: [`README.md`](README.md)
+
+---
 *실제 구현 시 최신 API 문서와 사이트 구조를 반드시 확인하세요.*

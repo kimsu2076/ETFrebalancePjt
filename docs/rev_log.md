@@ -1,5 +1,40 @@
 # ETF Rebalance ETL 수정 로그
 
+## 2026-06-28 — 7단계: 문서화 + 간단 모니터링 (Streamlit) (재시행)
+
+### 추가 파일
+| 파일 | 설명 |
+|------|------|
+| `src/monitor/__init__.py` | 모니터링 패키지 초기화 |
+| `src/monitor/dashboardQueries.py` | 대시보드용 DB 조회 (요약·NAV·이벤트·비중·holdings) |
+| `scripts/monitorDashboard.py` | Streamlit 모니터링 대시보드 |
+
+### 수정 파일
+| 파일 | 설명 |
+|------|------|
+| `README.md` | 프로젝트 전체 문서화 |
+| `ETF_Rebalancing_ETL_Definition.md` | §8 구현 완료 현황 섹션 추가 |
+| `requirements.txt` | `streamlit>=1.32.0` 추가 |
+
+### 주요 기능
+- 요약 카드, NAV 추이(기간 선택), 리밸런싱 이벤트 테이블
+- Top 5 종목 비중 추이, Holdings 스냅샷 조회, 검증 PASS/FAIL 표시
+- 5분 TTL 캐시 + 새로고침 버튼
+
+### 실행 방법
+```bash
+source /home/smt14/pywork/.venv/bin/activate
+cd /home/smt14/ETFrebalancePjt
+pip install -r requirements.txt
+streamlit run scripts/monitorDashboard.py
+```
+
+### 대시보드 데이터 확인 (2026-06-28)
+- ETF: TIGER 200 (102110), 이벤트 8건, NAV 502건, 스냅샷 9개
+- 검증 리포트: validation_report_20260628.json (8/8 PASS)
+
+---
+
 ## 2026-06-28 — 6단계: 데이터 품질 검증, 2년치 초기 적재, 로그/에러 핸들링 (재시행)
 
 ### 추가 파일

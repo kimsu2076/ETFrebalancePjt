@@ -23,6 +23,9 @@ python-dateutil>=2.8.0
 # 스케줄링 (간단한 인프로세스 스케줄링용, cron과 병행 가능)
 schedule>=1.2.0
 
+# 모니터링 대시보드 (7단계, Streamlit)
+streamlit>=1.32.0
+
 # 로깅 및 유틸 (선택)
 loguru>=0.7.0        # 더 예쁜 로깅 원하시면 (기본 logging도 충분)
 
