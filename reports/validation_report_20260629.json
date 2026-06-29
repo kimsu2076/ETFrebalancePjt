@@ -1,0 +1,156 @@
+{
+  "success": true,
+  "message": "데이터 품질 검증 완료",
+  "overallPassed": true,
+  "passedCount": 8,
+  "failedCount": 0,
+  "totalChecks": 8,
+  "failedChecks": [],
+  "checks": [
+    {
+      "checkName": "etf_master_exists",
+      "passed": true,
+      "message": "etf_master 마스터 데이터 확인",
+      "details": {
+        "etfCode": "102110",
+        "etfName": "TIGER 200",
+        "benchmarkIndex": "KOSPI 200"
+      }
+    },
+    {
+      "checkName": "nav_coverage",
+      "passed": true,
+      "message": "NAV 커버리지 확인",
+      "details": {
+        "rowCount": 503,
+        "minTradeDate": "20240603",
+        "maxTradeDate": "20260629",
+        "backfillStartDate": "20240601",
+        "startGapDays": 2,
+        "minRowCount": 400
+      }
+    },
+    {
+      "checkName": "nav_data_quality",
+      "passed": true,
+      "message": "NAV 데이터 품질 확인",
+      "details": {
+        "nullNavCount": 0,
+        "nullCloseCount": 0,
+        "negativeNavCount": 0,
+        "negativeCloseCount": 0,
+        "duplicateDateCount": 0,
+        "totalCount": 503
+      }
+    },
+    {
+      "checkName": "nav_date_gaps",
+      "passed": true,
+      "message": "NAV 거래일 공백 검증 완료",
+      "details": {
+        "largeGapCount": 0,
+        "largeGaps": [],
+        "thresholdDays": 10
+      }
+    },
+    {
+      "checkName": "holdings_weight_sum",
+      "passed": true,
+      "message": "holdings 비중 합계 검증 완료",
+      "details": {
+        "snapshotCount": 9,
+        "weightTolerancePct": 2.0,
+        "failedSnapshots": [],
+        "snapshotSummary": [
+          {
+            "snapshotDate": "2024-06-25",
+            "totalWeightPct": 99.98,
+            "stockCount": 200,
+            "negativeWeightCount": 0
+          },
+          {
+            "snapshotDate": "2024-09-25",
+            "totalWeightPct": 99.04,
+            "stockCount": 199,
+            "negativeWeightCount": 0
+          },
+          {
+            "snapshotDate": "2024-12-30",
+            "totalWeightPct": 99.48,
+            "stockCount": 200,
+            "negativeWeightCount": 0
+          },
+          {
+            "snapshotDate": "2025-03-25",
+            "totalWeightPct": 99.06,
+            "stockCount": 200,
+            "negativeWeightCount": 0
+          },
+          {
+            "snapshotDate": "2025-06-25",
+            "totalWeightPct": 100.02,
+            "stockCount": 200,
+            "negativeWeightCount": 0
+          },
+          {
+            "snapshotDate": "2025-09-25",
+            "totalWeightPct": 99.98,
+            "stockCount": 200,
+            "negativeWeightCount": 0
+          },
+          {
+            "snapshotDate": "2025-12-30",
+            "totalWeightPct": 99.7,
+            "stockCount": 200,
+            "negativeWeightCount": 0
+          },
+          {
+            "snapshotDate": "2026-03-25",
+            "totalWeightPct": 99.44,
+            "stockCount": 200,
+            "negativeWeightCount": 0
+          },
+          {
+            "snapshotDate": "2026-06-25",
+            "totalWeightPct": 100.02,
+            "stockCount": 199,
+            "negativeWeightCount": 0
+          }
+        ]
+      }
+    },
+    {
+      "checkName": "referential_integrity",
+      "passed": true,
+      "message": "참조 무결성 확인",
+      "details": {
+        "orphanCounts": {
+          "etf_nav_daily": 0,
+          "etf_holdings_snapshot": 0,
+          "rebalancing_event": 0
+        }
+      }
+    },
+    {
+      "checkName": "nav_holdings_alignment",
+      "passed": true,
+      "message": "NAV↔holdings 날짜 정합성 확인",
+      "details": {
+        "snapshotCount": 9,
+        "maxAllowedGapDays": 5,
+        "misalignedSnapshots": []
+      }
+    },
+    {
+      "checkName": "rebalancing_event_consistency",
+      "passed": true,
+      "message": "리밸런싱 이벤트 정합성 확인",
+      "details": {
+        "eventCount": 8,
+        "mismatchedEvents": []
+      }
+    }
+  ],
+  "validatedAt": "2026-06-29T09:34:44.107801",
+  "etfCode": "102110"
+}

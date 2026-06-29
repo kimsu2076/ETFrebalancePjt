@@ -1,5 +1,19 @@
 # ETF Rebalance ETL 수정 로그
 
+## 2026-06-28 — Top 5 비중 차트 Y축 % 표시 수정
+
+### 수정 파일
+| 파일 | 설명 |
+|------|------|
+| `src/monitor/dashboardQueries.py` | Decimal → float 정규화 (`weight_pct` 등) |
+| `scripts/monitorDashboard.py` | 비중 차트 Y축 0~100% 스케일, `weight_pct` 필드명 통일, NAV 축 라벨 `(원)` |
+
+### 원인·조치
+- DB `weight_pct`는 34.21(=34.21%)로 정상이었으나 `Decimal`이 object로 전달되어 Altair 축이 천 단위 콤마로 `34,210`처럼 표시됨
+- float 변환 + `axis format ".1f"` + domain `[0, max]` 로 **퍼센트(%)** 로 통일
+
+---
+
 ## 2026-06-28 — 모니터링 포트 정책 정리
 
 ### 추가·수정 파일

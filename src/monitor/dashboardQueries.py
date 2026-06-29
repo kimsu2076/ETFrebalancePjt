@@ -21,17 +21,45 @@ def formatDateValue(dateValue):
     return str(dateValue)[:10]
 
 
+NUMERIC_COLUMN_NAMES = [
+    "nav",
+    "close_price",
+    "change_rate",
+    "weight_pct",
+    "shares",
+    "market_value_krw",
+    "rank_in_portfolio",
+    "added_stocks_count",
+    "removed_stocks_count",
+    "changed_weights_count",
+    "total_turnover_pct",
+]
+
+
+def normalizeCellValue(cellValue, columnName):
+    """DB 셀 값을 DataFrame 적재용 Python 기본 타입으로 정규화한다."""
+    if cellValue is None:
+        return None
+    if hasattr(cellValue, "isoformat"):
+        return cellValue.isoformat()
+
+    if columnName in NUMERIC_COLUMN_NAMES:
+        try:
+            return float(cellValue)
+        except (ValueError, TypeError):
+            return cellValue
+
+    return cellValue
+
+
 def rowsToDataFrame(rows, columnNames):
     """SQLAlchemy 결과 행을 pandas DataFrame으로 변환한다."""
     recordList = []
     for i in range(0, len(rows)):
         rowDict = {}
         for j in range(0, len(columnNames)):
-            cellValue = rows[i][j]
-            if hasattr(cellValue, "isoformat"):
-                rowDict[columnNames[j]] = cellValue.isoformat()
-            else:
-                rowDict[columnNames[j]] = cellValue
+            columnName = columnNames[j]
+            rowDict[columnName] = normalizeCellValue(rows[i][j], columnName)
         recordList.append(rowDict)
 
     if len(recordList) == 0:

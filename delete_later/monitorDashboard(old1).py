@@ -60,31 +60,9 @@ def renderNavChart(navTrendData, periodLabel):
         st.info("NAV 데이터가 없습니다.")
         return
 
-    hover = alt.selection_point(
-        nearest=True,
-        on="pointerover",
-        encodings=["x"],
-        empty=False,
-    )
+    chartFrame = dataFrame.set_index("trade_date")
+    st.line_chart(chartFrame["nav"], height=300)
 
-    # chartFrame = dataFrame.set_index("trade_date")
-    # st.line_chart(chartFrame["nav"], height=300)
-    source = dataFrame.copy()
-    source["nav"] = pd.to_numeric(source["nav"], errors="coerce")
-    chart = alt.Chart(source).mark_line(point=True).encode(
-        x=alt.X("trade_date:T", title="날짜"),
-        y=alt.Y(
-            "nav:Q",
-            title="NAV (원)",
-            scale=alt.Scale(reverse=False, nice=True),
-            axis=alt.Axis(format=",.0f"),
-        ),
-        tooltip=[
-            alt.Tooltip("trade_date:T", title="날짜", format="%Y-%m-%d"),
-            alt.Tooltip("nav:Q", title="NAV", format=",.2f"),
-        ],
-    ).add_params(hover).properties(height=300).interactive()
-    st.altair_chart(chart, use_container_width=True)
 
 def renderEventsTable(eventsData):
     """리밸런싱 이벤트 테이블을 렌더링한다."""
@@ -146,43 +124,7 @@ def renderWeightTrends(topStocksData, weightTrendMap):
         st.info("비중 추이 데이터가 없습니다.")
         return
 
-    longFrame = mergedFrame.reset_index().melt(
-        id_vars="snapshot_date",
-        var_name="종목",
-        value_name="weight_pct",
-    )
-    longFrame["weight_pct"] = pd.to_numeric(longFrame["weight_pct"], errors="coerce")
-
-    weightMax = longFrame["weight_pct"].max()
-    if weightMax is None or pd.isna(weightMax):
-        st.info("비중 수치를 읽을 수 없습니다.")
-        return
-
-    yDomainMax = min(100.0, float(weightMax) * 1.15 + 1.0)
-
-    hover = alt.selection_point(
-        nearest=True,
-        on="pointerover",
-        encodings=["x"],
-        empty=False,
-    )
-
-    chart = alt.Chart(longFrame).mark_line(point=True).encode(
-        x=alt.X("snapshot_date:T", title="기준일"),
-        y=alt.Y(
-            "weight_pct:Q",
-            title="비중 (%)",
-            scale=alt.Scale(reverse=False, domain=[0, yDomainMax], nice=True),
-            axis=alt.Axis(format=".1f"),
-        ),
-        color="종목:N",
-        tooltip=[
-            alt.Tooltip("snapshot_date:T", title="기준일", format="%Y-%m-%d"),
-            alt.Tooltip("종목:N", title="종목"),
-            alt.Tooltip("weight_pct:Q", title="비중 (%)", format=".2f"),
-        ],
-    ).add_params(hover).properties(height=300).interactive()
-    st.altair_chart(chart, use_container_width=True)
+    st.line_chart(mergedFrame, height=300)
 
 
 def renderHoldingsTable(holdingsData, snapshotDate):
