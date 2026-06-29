@@ -58,12 +58,22 @@ def runInitialLoad(skipNav=False, skipHoldings=False, skipValidation=False, cust
 
         holdingsResult = {"success": True, "message": "Holdings 백필 스킵", "skipped": True}
         if skipHoldings is False:
-            datesResult = getHoldingsBackfillDates(customDates=customHoldingsDates)
+            holdingsEngine = getDbEngine(includeDatabase=True)
+            datesResult = getHoldingsBackfillDates(
+                customDates=customHoldingsDates,
+                engine=holdingsEngine,
+                etfCode=etfCode,
+            )
             if datesResult.get("success") is not True:
                 return datesResult
 
             dateList = datesResult.get("dates", [])
-            logger.info("Holdings 분기 백필 실행 — %d개 기준일", len(dateList))
+            calendarCount = datesResult.get("calendarDateCount", len(dateList))
+            logger.info(
+                "Holdings 분기 백필 실행 — 달력 %d개 → 영업일 %d개",
+                calendarCount,
+                len(dateList),
+            )
             holdingsResult = runHoldingsEtl(runMode="backfill", dateList=dateList)
             if holdingsResult.get("success") is not True:
                 logEtlError(

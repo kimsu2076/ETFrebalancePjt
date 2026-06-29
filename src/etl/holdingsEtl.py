@@ -20,11 +20,12 @@ from src.db.rebalancingRepository import (
     getRecentRebalancingEvents,
     insertRebalancingEvent,
 )
+from src.etl.holdingsBackfillDates import buildScrapeCandidateDates
 from src.etl.rebalancingDetector import (
     buildRebalancingEventRecord,
     detectRebalancingChanges,
 )
-from src.scraper.tigerHoldingsScraper import scrapeTigerHoldings
+from src.scraper.tigerHoldingsScraper import normalizeSnapshotDate, scrapeTigerHoldings
 
 
 def setupHoldingsEtlLogger():
@@ -44,27 +45,66 @@ def filterEquityRecords(recordList):
 
 def processSingleSnapshot(engine, etfCode, snapshotDate, logger):
     """단일 스냅샷일에 대해 스크래핑·적재·리밸런싱 감지를 수행한다."""
-    existsResult = snapshotExists(engine, etfCode, snapshotDate)
-    if existsResult.get("success") is not True:
-        return existsResult
-
-    if existsResult.get("exists") is True:
-        logger.info("스냅샷 이미 존재 — 스킵: %s", snapshotDate)
+    requestedDateYmd = normalizeSnapshotDate(snapshotDate).replace("-", "")
+    candidateDates = buildScrapeCandidateDates(engine, etfCode, requestedDateYmd)
+    if len(candidateDates) == 0:
         return {
-            "success": True,
-            "message": "스냅샷이 이미 존재하여 스킵했습니다.",
-            "snapshotDate": snapshotDate,
-            "skipped": True,
-            "insertedCount": 0,
+            "success": False,
+            "message": "스크래핑 후보 영업일이 없습니다: " + requestedDateYmd,
         }
 
-    scrapeResult = scrapeTigerHoldings(snapshotDate=snapshotDate)
-    if scrapeResult.get("success") is not True:
-        logger.error(scrapeResult.get("message", ""))
-        return scrapeResult
+    scrapeResult = None
+    resolvedSnapshotDate = ""
+    lastErrorMessage = ""
+
+    for i in range(0, len(candidateDates)):
+        candidateDateYmd = candidateDates[i]
+        candidateDateText = normalizeSnapshotDate(candidateDateYmd)
+
+        existsResult = snapshotExists(engine, etfCode, candidateDateText)
+        if existsResult.get("success") is not True:
+            return existsResult
+
+        if existsResult.get("exists") is True:
+            logger.info("스냅샷 이미 존재 — 스킵: %s", candidateDateText)
+            return {
+                "success": True,
+                "message": "스냅샷이 이미 존재하여 스킵했습니다.",
+                "snapshotDate": candidateDateText,
+                "requestedDateYmd": requestedDateYmd,
+                "skipped": True,
+                "insertedCount": 0,
+            }
+
+        scrapeResult = scrapeTigerHoldings(snapshotDate=candidateDateText)
+        if scrapeResult.get("success") is True:
+            resolvedSnapshotDate = candidateDateText
+            if candidateDateYmd != requestedDateYmd:
+                logger.info(
+                    "영업일 보정 스크래핑 — 요청 %s → 적용 %s",
+                    requestedDateYmd,
+                    candidateDateYmd,
+                )
+            break
+
+        lastErrorMessage = scrapeResult.get("message", "")
+        logger.warning(
+            "스크래핑 실패 — 후보일 %s: %s",
+            candidateDateText,
+            lastErrorMessage,
+        )
+
+    if scrapeResult is None or scrapeResult.get("success") is not True:
+        logger.error(lastErrorMessage)
+        return {
+            "success": False,
+            "message": lastErrorMessage,
+            "requestedDateYmd": requestedDateYmd,
+            "candidateDates": candidateDates,
+        }
 
     recordList = scrapeResult.get("records", [])
-    logger.info("스크래핑 완료 — %d건 (%s)", len(recordList), snapshotDate)
+    logger.info("스크래핑 완료 — %d건 (%s)", len(recordList), resolvedSnapshotDate)
 
     loadResult = insertHoldingsSnapshot(engine, recordList)
     if loadResult.get("success") is not True:
@@ -83,7 +123,7 @@ def processSingleSnapshot(engine, etfCode, snapshotDate, logger):
         "eventInserted": False,
     }
 
-    prevDateResult = getPreviousSnapshotDate(engine, etfCode, snapshotDate)
+    prevDateResult = getPreviousSnapshotDate(engine, etfCode, resolvedSnapshotDate)
     if prevDateResult.get("success") is not True:
         return prevDateResult
 
@@ -102,7 +142,7 @@ def processSingleSnapshot(engine, etfCode, snapshotDate, logger):
         if detectionResult.get("hasChanges") is True:
             eventRecord = buildRebalancingEventRecord(
                 etfCode,
-                snapshotDate,
+                resolvedSnapshotDate,
                 detectionResult,
                 sourceName="Detected",
             )
@@ -132,7 +172,8 @@ def processSingleSnapshot(engine, etfCode, snapshotDate, logger):
     return {
         "success": True,
         "message": "단일 스냅샷 ETL 완료",
-        "snapshotDate": snapshotDate,
+        "snapshotDate": resolvedSnapshotDate,
+        "requestedDateYmd": requestedDateYmd,
         "skipped": False,
         "scrape": {
             "recordCount": scrapeResult.get("recordCount", 0),

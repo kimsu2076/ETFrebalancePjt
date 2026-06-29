@@ -83,7 +83,7 @@ def renderNavChart(navTrendData, periodLabel):
             alt.Tooltip("trade_date:T", title="날짜", format="%Y-%m-%d"),
             alt.Tooltip("nav:Q", title="NAV", format=",.2f"),
         ],
-    ).add_params(hover).properties(height=300).interactive()
+    ).add_params(hover).properties(height=500).interactive()
     st.altair_chart(chart, use_container_width=True)
 
 def renderEventsTable(eventsData):
@@ -113,7 +113,7 @@ def renderEventsTable(eventsData):
 
 def renderWeightTrends(topStocksData, weightTrendMap):
     """상위 종목 비중 추이 차트를 렌더링한다."""
-    st.subheader("Top 5 종목 비중 추이")
+    st.subheader("Top 10 종목 비중 추이")
     if topStocksData.get("success") is not True:
         st.warning(topStocksData.get("message", ""))
         return
@@ -181,7 +181,7 @@ def renderWeightTrends(topStocksData, weightTrendMap):
             alt.Tooltip("종목:N", title="종목"),
             alt.Tooltip("weight_pct:Q", title="비중 (%)", format=".2f"),
         ],
-    ).add_params(hover).properties(height=300).interactive()
+    ).add_params(hover).properties(height=500).interactive()
     st.altair_chart(chart, use_container_width=True)
 
 
@@ -267,9 +267,10 @@ def runMonitorDashboard():
                 "3개월": 90,
                 "6개월": 180,
                 "1년": 365,
-                "전체": 730,
+                "3년": 1095,
+                "전체": 4000,
             }
-            periodLabel = st.selectbox("NAV 기간", list(periodOptions.keys()), index=3)
+            periodLabel = st.selectbox("NAV 기간", list(periodOptions.keys()), index=5)
             periodDays = periodOptions.get(periodLabel, 365)
 
             engine = getDbEngine(includeDatabase=True)

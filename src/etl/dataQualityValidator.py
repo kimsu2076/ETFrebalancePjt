@@ -17,9 +17,9 @@ from src.etl.rebalancingDetector import detectRebalancingChanges
 
 WEIGHT_TOLERANCE_PCT = 2.0
 NAV_HOLDINGS_MAX_GAP_DAYS = 5
-LARGE_GAP_CALENDAR_DAYS = 10
+LARGE_GAP_CALENDAR_DAYS = 12
 NAV_COVERAGE_START_TOLERANCE_DAYS = 10
-MIN_NAV_ROW_COUNT = 400
+MIN_NAV_ROW_COUNT = 2000
 
 
 def getReportsDirectory():
@@ -126,7 +126,7 @@ def validateNavCoverage(engine, etfCode):
         message = "NAV 데이터가 없습니다."
         passed = False
     elif rowCount < MIN_NAV_ROW_COUNT:
-        message = "NAV 건수가 2년치 최소 기준(" + str(MIN_NAV_ROW_COUNT) + "건) 미만입니다."
+        message = "NAV 건수가 10년치 최소 기준(" + str(MIN_NAV_ROW_COUNT) + "건) 미만입니다."
         passed = False
     elif startGapDays > NAV_COVERAGE_START_TOLERANCE_DAYS:
         message = "NAV 시작일이 백필 목표 대비 허용 범위를 초과합니다."

@@ -1,5 +1,63 @@
 # ETF Rebalance ETL 수정 로그
 
+## 2026-06-29 — Holdings 분기말 영업일 보정
+
+### 수정 파일
+| 파일 | 설명 |
+|------|------|
+| `src/db/navRepository.py` | `getNearestTradeDateOnOrBefore`, `getTradeDatesOnOrBefore` 추가 |
+| `src/etl/holdingsBackfillDates.py` | 분기말 → NAV 영업일 변환, 스크래핑 후보일 생성 |
+| `src/etl/holdingsEtl.py` | 스크래핑 실패 시 최대 6영업일 역순 재시도 |
+| `src/etl/initialLoadRunner.py` | 백필 시 영업일 보정 목록 사용 |
+
+### 동작
+- 분기말(3·6·9·12월) 달력일 → `etf_nav_daily` 최근 거래일로 선보정
+- TIGER 사이트 미제공 시 이전 영업일 최대 6일까지 자동 재시도
+- 주말만 있는 경우 금요일 등 평일로 폴백
+
+### 재적재 결과
+- Holdings 스냅샷: 33 → **53개** (42분기 전부 커버)
+- 리밸런싱 이벤트: **49건**
+- 검증: **8/8 PASS**
+
+---
+
+## 2026-06-29 — 9단계: 데이터·차트 확장 (10년 백필)
+
+### 수정 파일
+| 파일 | 설명 |
+|------|------|
+| `src/etl/holdingsBackfillDates.py` | 3·6·9·12월 분기말 기준일 자동 생성 (`generateQuarterlyDates`), `HOLDINGS_BACKFILL_END_DATE` 지원 |
+| `src/db/navRepository.py` | NAV 백필 기본 시작일 `20160331` |
+| `src/etl/dataQualityValidator.py` | `MIN_NAV_ROW_COUNT` 400 → 2000 (10년치) |
+| `src/monitor/dashboardQueries.py` | Top 종목 조회 기본값 5 → 10 |
+| `scripts/monitorDashboard.py` | Top 10 비중 차트, 차트 높이 500px, NAV 전체 기간 4000일·3년 옵션 추가 |
+| `.env.example` | `NAV_BACKFILL_START_DATE=20160331`, `HOLDINGS_BACKFILL_END_DATE=20260629` |
+
+### 데이터 기간
+- **NAV:** `20160331` ~ 현재 (KIS API 백필)
+- **Holdings:** 분기말 42회 (`20160331` ~ `20260629`, 6월말은 종료일 cap)
+- env에 긴 `HOLDINGS_BACKFILL_DATES` 목록 대신 코드 자동 생성 (수동 override는 선택)
+
+### 검증 기준 조정
+- `LARGE_GAP_CALENDAR_DAYS` 10 → 12 (2017 추석 연휴 11일 공백 허용)
+
+### 적재 결과 (2026-06-29)
+- NAV: **2512건** (20160331 ~ 20260629)
+- Holdings 스냅샷: **33개** / 42 시도 (TIGER 사이트에 없는 과거 분기말·비영업일 9건 스킵)
+- 리밸런싱 이벤트: **30건**
+- 검증: **8/8 PASS**
+
+### 실행
+```bash
+source /home/smt14/pywork/.venv/bin/activate
+cd /home/smt14/ETFrebalancePjt
+python scripts/runInitialLoad.py
+python scripts/validateData.py
+```
+
+---
+
 ## 2026-06-28 — Top 5 비중 차트 Y축 % 표시 수정
 
 ### 수정 파일

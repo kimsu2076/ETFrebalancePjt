@@ -20,7 +20,7 @@ def formatDateToYmd(dateValue):
 def getBackfillStartDate():
     """환경 변수 또는 기본값으로 백필 시작일(YYYYMMDD)을 반환한다."""
     loadProjectEnv()
-    startDateText = getEnvValue("NAV_BACKFILL_START_DATE", "20240601")
+    startDateText = getEnvValue("NAV_BACKFILL_START_DATE", "20160331")
     if len(startDateText) == 10 and startDateText.count("-") == 2:
         startDateText = startDateText.replace("-", "")
     return startDateText
@@ -250,4 +250,107 @@ def getNavDailyStats(engine, etfCode):
         return {
             "success": False,
             "message": "NAV 통계 조회 실패: " + str(statsError),
+        }
+
+
+def normalizeDateYmdInput(dateText):
+    """날짜 입력을 YYYYMMDD 문자열로 정규화한다."""
+    if dateText is None:
+        return ""
+    cleanedText = str(dateText).strip().replace("-", "").replace("/", "").replace(".", "")
+    if len(cleanedText) >= 8:
+        return cleanedText[0:8]
+    return cleanedText
+
+
+def getNearestTradeDateOnOrBefore(engine, etfCode, dateYmd):
+    """특정 일자 이전(포함) 가장 가까운 NAV 거래일을 조회한다."""
+    normalizedYmd = normalizeDateYmdInput(dateYmd)
+    if normalizedYmd == "":
+        return {
+            "success": False,
+            "message": "거래일 조회용 날짜가 비어 있습니다.",
+        }
+
+    selectSql = """
+        SELECT MAX(trade_date) AS nearest_date
+        FROM etf_nav_daily
+        WHERE etf_code = :etf_code
+          AND trade_date <= STR_TO_DATE(:date_ymd, '%Y%m%d')
+    """
+    try:
+        with engine.connect() as connection:
+            result = connection.execute(
+                text(selectSql),
+                {"etf_code": etfCode, "date_ymd": normalizedYmd},
+            )
+            rowData = result.fetchone()
+
+        if rowData is None or rowData[0] is None:
+            return {
+                "success": True,
+                "message": "해당 일자 이전 NAV 거래일 없음",
+                "tradeDate": None,
+                "tradeDateYmd": "",
+            }
+
+        tradeDate = rowData[0]
+        return {
+            "success": True,
+            "message": "가장 가까운 NAV 거래일 조회 완료",
+            "tradeDate": tradeDate,
+            "tradeDateYmd": formatDateToYmd(tradeDate),
+        }
+    except Exception as queryError:
+        return {
+            "success": False,
+            "message": "NAV 거래일 조회 실패: " + str(queryError),
+        }
+
+
+def getTradeDatesOnOrBefore(engine, etfCode, dateYmd, limitCount=6):
+    """특정 일자 이전(포함) NAV 거래일을 최신순으로 조회한다."""
+    normalizedYmd = normalizeDateYmdInput(dateYmd)
+    if normalizedYmd == "":
+        return {
+            "success": False,
+            "message": "거래일 목록 조회용 날짜가 비어 있습니다.",
+            "tradeDateYmdList": [],
+        }
+
+    selectSql = """
+        SELECT trade_date
+        FROM etf_nav_daily
+        WHERE etf_code = :etf_code
+          AND trade_date <= STR_TO_DATE(:date_ymd, '%Y%m%d')
+        ORDER BY trade_date DESC
+        LIMIT :limit_count
+    """
+    tradeDateYmdList = []
+    try:
+        with engine.connect() as connection:
+            result = connection.execute(
+                text(selectSql),
+                {
+                    "etf_code": etfCode,
+                    "date_ymd": normalizedYmd,
+                    "limit_count": limitCount,
+                },
+            )
+            rows = result.fetchall()
+
+        for i in range(0, len(rows)):
+            tradeDateYmdList.append(formatDateToYmd(rows[i][0]))
+
+        return {
+            "success": True,
+            "message": "NAV 거래일 목록 조회 완료",
+            "tradeDateYmdList": tradeDateYmdList,
+            "count": len(tradeDateYmdList),
+        }
+    except Exception as queryError:
+        return {
+            "success": False,
+            "message": "NAV 거래일 목록 조회 실패: " + str(queryError),
+            "tradeDateYmdList": [],
         }

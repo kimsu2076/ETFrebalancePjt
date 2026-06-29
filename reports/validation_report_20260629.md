@@ -1,6 +1,6 @@
 # ETF Rebalance ETL 데이터 품질 검증 리포트
 
-- 검증 시각: 2026-06-29T09:34:44.107801
+- 검증 시각: 2026-06-29T16:48:40.355396
 - 대상 ETF: 102110
 - 종합 결과: PASS
 - 통과/전체: 8/8
@@ -23,12 +23,12 @@ NAV 커버리지 확인
 
 ```json
 {
-  "rowCount": 503,
-  "minTradeDate": "20240603",
+  "rowCount": 2512,
+  "minTradeDate": "20160331",
   "maxTradeDate": "20260629",
-  "backfillStartDate": "20240601",
-  "startGapDays": 2,
-  "minRowCount": 400
+  "backfillStartDate": "20160331",
+  "startGapDays": 0,
+  "minRowCount": 2000
 }
 ```
 
@@ -43,7 +43,7 @@ NAV 데이터 품질 확인
   "negativeNavCount": 0,
   "negativeCloseCount": 0,
   "duplicateDateCount": 0,
-  "totalCount": 503
+  "totalCount": 2512
 }
 ```
 
@@ -55,7 +55,7 @@ NAV 거래일 공백 검증 완료
 {
   "largeGapCount": 0,
   "largeGaps": [],
-  "thresholdDays": 10
+  "thresholdDays": 12
 }
 ```
 
@@ -65,14 +65,230 @@ holdings 비중 합계 검증 완료
 
 ```json
 {
-  "snapshotCount": 9,
+  "snapshotCount": 53,
   "weightTolerancePct": 2.0,
   "failedSnapshots": [],
   "snapshotSummary": [
     {
+      "snapshotDate": "2016-03-31",
+      "totalWeightPct": 98.46,
+      "stockCount": 200,
+      "negativeWeightCount": 0
+    },
+    {
+      "snapshotDate": "2016-06-30",
+      "totalWeightPct": 99.77,
+      "stockCount": 200,
+      "negativeWeightCount": 0
+    },
+    {
+      "snapshotDate": "2016-09-30",
+      "totalWeightPct": 99.81,
+      "stockCount": 199,
+      "negativeWeightCount": 0
+    },
+    {
+      "snapshotDate": "2016-12-29",
+      "totalWeightPct": 98.25,
+      "stockCount": 199,
+      "negativeWeightCount": 0
+    },
+    {
+      "snapshotDate": "2017-03-28",
+      "totalWeightPct": 98.42,
+      "stockCount": 198,
+      "negativeWeightCount": 0
+    },
+    {
+      "snapshotDate": "2017-06-30",
+      "totalWeightPct": 99.23,
+      "stockCount": 198,
+      "negativeWeightCount": 0
+    },
+    {
+      "snapshotDate": "2017-09-29",
+      "totalWeightPct": 99.16,
+      "stockCount": 196,
+      "negativeWeightCount": 0
+    },
+    {
+      "snapshotDate": "2017-12-28",
+      "totalWeightPct": 98.42,
+      "stockCount": 198,
+      "negativeWeightCount": 0
+    },
+    {
+      "snapshotDate": "2018-03-30",
+      "totalWeightPct": 98.47,
+      "stockCount": 200,
+      "negativeWeightCount": 0
+    },
+    {
+      "snapshotDate": "2018-06-29",
+      "totalWeightPct": 99.17,
+      "stockCount": 199,
+      "negativeWeightCount": 0
+    },
+    {
+      "snapshotDate": "2018-09-28",
+      "totalWeightPct": 99.5,
+      "stockCount": 200,
+      "negativeWeightCount": 0
+    },
+    {
+      "snapshotDate": "2018-12-28",
+      "totalWeightPct": 98.27,
+      "stockCount": 200,
+      "negativeWeightCount": 0
+    },
+    {
+      "snapshotDate": "2019-03-29",
+      "totalWeightPct": 98.59,
+      "stockCount": 200,
+      "negativeWeightCount": 0
+    },
+    {
+      "snapshotDate": "2019-06-28",
+      "totalWeightPct": 99.46,
+      "stockCount": 200,
+      "negativeWeightCount": 0
+    },
+    {
+      "snapshotDate": "2019-09-30",
+      "totalWeightPct": 99.41,
+      "stockCount": 199,
+      "negativeWeightCount": 0
+    },
+    {
+      "snapshotDate": "2019-12-30",
+      "totalWeightPct": 98.1,
+      "stockCount": 199,
+      "negativeWeightCount": 0
+    },
+    {
+      "snapshotDate": "2020-03-31",
+      "totalWeightPct": 98.0,
+      "stockCount": 200,
+      "negativeWeightCount": 0
+    },
+    {
+      "snapshotDate": "2020-06-30",
+      "totalWeightPct": 99.62,
+      "stockCount": 200,
+      "negativeWeightCount": 0
+    },
+    {
+      "snapshotDate": "2020-09-29",
+      "totalWeightPct": 100.77,
+      "stockCount": 200,
+      "negativeWeightCount": 0
+    },
+    {
+      "snapshotDate": "2020-12-29",
+      "totalWeightPct": 98.25,
+      "stockCount": 198,
+      "negativeWeightCount": 0
+    },
+    {
+      "snapshotDate": "2020-12-31",
+      "totalWeightPct": 98.26,
+      "stockCount": 198,
+      "negativeWeightCount": 0
+    },
+    {
+      "snapshotDate": "2021-03-31",
+      "totalWeightPct": 98.6,
+      "stockCount": 200,
+      "negativeWeightCount": 0
+    },
+    {
+      "snapshotDate": "2021-06-30",
+      "totalWeightPct": 99.53,
+      "stockCount": 199,
+      "negativeWeightCount": 0
+    },
+    {
+      "snapshotDate": "2021-09-30",
+      "totalWeightPct": 99.72,
+      "stockCount": 200,
+      "negativeWeightCount": 0
+    },
+    {
+      "snapshotDate": "2021-12-30",
+      "totalWeightPct": 98.68,
+      "stockCount": 200,
+      "negativeWeightCount": 0
+    },
+    {
+      "snapshotDate": "2021-12-31",
+      "totalWeightPct": 98.68,
+      "stockCount": 200,
+      "negativeWeightCount": 0
+    },
+    {
+      "snapshotDate": "2022-03-31",
+      "totalWeightPct": 98.49,
+      "stockCount": 200,
+      "negativeWeightCount": 0
+    },
+    {
+      "snapshotDate": "2022-06-30",
+      "totalWeightPct": 99.34,
+      "stockCount": 200,
+      "negativeWeightCount": 0
+    },
+    {
+      "snapshotDate": "2022-09-30",
+      "totalWeightPct": 99.49,
+      "stockCount": 200,
+      "negativeWeightCount": 0
+    },
+    {
+      "snapshotDate": "2022-12-29",
+      "totalWeightPct": 98.38,
+      "stockCount": 200,
+      "negativeWeightCount": 0
+    },
+    {
+      "snapshotDate": "2023-03-31",
+      "totalWeightPct": 98.66,
+      "stockCount": 199,
+      "negativeWeightCount": 0
+    },
+    {
+      "snapshotDate": "2023-06-30",
+      "totalWeightPct": 99.67,
+      "stockCount": 200,
+      "negativeWeightCount": 0
+    },
+    {
+      "snapshotDate": "2023-09-27",
+      "totalWeightPct": 99.71,
+      "stockCount": 200,
+      "negativeWeightCount": 0
+    },
+    {
+      "snapshotDate": "2023-12-28",
+      "totalWeightPct": 99.23,
+      "stockCount": 200,
+      "negativeWeightCount": 0
+    },
+    {
+      "snapshotDate": "2024-03-29",
+      "totalWeightPct": 98.77,
+      "stockCount": 200,
+      "negativeWeightCount": 0
+    },
+    {
       "snapshotDate": "2024-06-25",
       "totalWeightPct": 99.98,
       "stockCount": 200,
+      "negativeWeightCount": 0
+    },
+    {
+      "snapshotDate": "2024-06-28",
+      "totalWeightPct": 99.66,
+      "stockCount": 199,
       "negativeWeightCount": 0
     },
     {
@@ -82,7 +298,19 @@ holdings 비중 합계 검증 완료
       "negativeWeightCount": 0
     },
     {
+      "snapshotDate": "2024-09-30",
+      "totalWeightPct": 99.61,
+      "stockCount": 200,
+      "negativeWeightCount": 0
+    },
+    {
       "snapshotDate": "2024-12-30",
+      "totalWeightPct": 99.48,
+      "stockCount": 200,
+      "negativeWeightCount": 0
+    },
+    {
+      "snapshotDate": "2024-12-31",
       "totalWeightPct": 99.48,
       "stockCount": 200,
       "negativeWeightCount": 0
@@ -94,8 +322,20 @@ holdings 비중 합계 검증 완료
       "negativeWeightCount": 0
     },
     {
+      "snapshotDate": "2025-03-31",
+      "totalWeightPct": 98.67,
+      "stockCount": 200,
+      "negativeWeightCount": 0
+    },
+    {
       "snapshotDate": "2025-06-25",
       "totalWeightPct": 100.02,
+      "stockCount": 200,
+      "negativeWeightCount": 0
+    },
+    {
+      "snapshotDate": "2025-06-30",
+      "totalWeightPct": 99.86,
       "stockCount": 200,
       "negativeWeightCount": 0
     },
@@ -106,7 +346,19 @@ holdings 비중 합계 검증 완료
       "negativeWeightCount": 0
     },
     {
+      "snapshotDate": "2025-09-30",
+      "totalWeightPct": 99.83,
+      "stockCount": 200,
+      "negativeWeightCount": 0
+    },
+    {
       "snapshotDate": "2025-12-30",
+      "totalWeightPct": 99.7,
+      "stockCount": 200,
+      "negativeWeightCount": 0
+    },
+    {
+      "snapshotDate": "2025-12-31",
       "totalWeightPct": 99.7,
       "stockCount": 200,
       "negativeWeightCount": 0
@@ -118,8 +370,20 @@ holdings 비중 합계 검증 완료
       "negativeWeightCount": 0
     },
     {
+      "snapshotDate": "2026-03-31",
+      "totalWeightPct": 99.26,
+      "stockCount": 200,
+      "negativeWeightCount": 0
+    },
+    {
       "snapshotDate": "2026-06-25",
       "totalWeightPct": 100.02,
+      "stockCount": 199,
+      "negativeWeightCount": 0
+    },
+    {
+      "snapshotDate": "2026-06-26",
+      "totalWeightPct": 100.07,
       "stockCount": 199,
       "negativeWeightCount": 0
     }
@@ -147,7 +411,7 @@ NAV↔holdings 날짜 정합성 확인
 
 ```json
 {
-  "snapshotCount": 9,
+  "snapshotCount": 53,
   "maxAllowedGapDays": 5,
   "misalignedSnapshots": []
 }
@@ -159,7 +423,7 @@ NAV↔holdings 날짜 정합성 확인
 
 ```json
 {
-  "eventCount": 8,
+  "eventCount": 49,
   "mismatchedEvents": []
 }
 ```

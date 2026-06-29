@@ -174,7 +174,7 @@ def getRebalancingEventsDataFrame(engine, etfCode, limitCount=20):
         }
 
 
-def getTopStockCodes(engine, etfCode, limitCount=5):
+def getTopStockCodes(engine, etfCode, limitCount=10):
     """최신 스냅샷 기준 상위 비중 종목 코드 목록을 조회한다."""
     topSql = """
         SELECT stock_code, stock_name, weight_pct
@@ -375,7 +375,7 @@ def loadDashboardData():
         summaryResult = getDashboardSummary(engine, etfCode)
         navTrendResult = getNavTrendDataFrame(engine, etfCode, periodDays=365)
         eventsResult = getRebalancingEventsDataFrame(engine, etfCode, limitCount=15)
-        topStocksResult = getTopStockCodes(engine, etfCode, limitCount=5)
+        topStocksResult = getTopStockCodes(engine, etfCode, limitCount=10)
         snapshotDatesResult = getSnapshotDateList(engine, etfCode)
         validationResult = findLatestValidationReport()
 
